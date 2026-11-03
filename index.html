@@ -22,7 +22,13 @@
   <header class="topbar">
     <img src="assets/images/logo-circle.png" alt="" class="topbar-logo">
     <div class="topbar-title">
-      <h1 id="app-title">Security Tool</h1>
+      <h1>
+        <span id="app-title">Security Tool</span>
+        <span class="tool-pick" id="tool-pick" hidden>
+          <span id="tool-name" aria-hidden="true"></span>
+          <select id="tool-select" aria-label="Form"></select>
+        </span>
+      </h1>
       <p>Lake Merwin Campers Hideaway</p>
     </div>
     <button type="button" id="theme-btn" class="theme-btn"></button>
@@ -43,11 +49,6 @@
   </section>
 
   <main id="tools" hidden>
-    <nav class="tabs" role="tablist" aria-label="Tools">
-      <button type="button" role="tab" id="tab-shift-report" aria-controls="report">Shift report</button>
-      <button type="button" role="tab" id="tab-citation" aria-controls="citation">Citation</button>
-    </nav>
-
     <!-- ================= Violation notice ================= -->
     <form id="citation" autocomplete="off" hidden>
       <!-- Location ------------------------------------------------------ -->
@@ -179,6 +180,12 @@
             <label><input type="radio" name="Pictures Attached" value="No"> No</label>
           </fieldset>
         </div>
+        <div class="photos" id="cg-photos-box" hidden>
+          <button type="button" class="button secondary photo-add" id="cg-photo-btn">Add photos</button>
+          <input type="file" id="cg-photo-input" accept="image/*" multiple hidden>
+          <span class="hint" id="cg-photo-hint">Photos go in the shift packet, right after this citation.</span>
+          <div class="photo-thumbs" id="cg-photos"></div>
+        </div>
       </section>
 
       <section class="card">
@@ -220,6 +227,7 @@
 
       <div class="actions">
         <button type="button" id="cg-new-btn" class="secondary">New citation</button>
+        <button type="button" id="cg-packet-btn" class="pdf-action" hidden>Add to packet</button>
         <button type="button" id="cg-share-btn" class="pdf-action" hidden>Share / Print / Save</button>
         <a id="cg-download-main" class="button pdf-action" hidden>Download PDF</a>
       </div>
@@ -227,6 +235,138 @@
       <div id="cg-pdf-result" class="pdf-result" hidden>
         <a id="cg-download-link" class="button secondary pdf-action">Download</a>
         <a id="cg-open-link" class="button secondary pdf-action" target="_blank" rel="noopener">Open</a>
+      </div>
+    </form>
+
+    <!-- ================= Incident report ================= -->
+    <form id="incident" autocomplete="off" hidden>
+      <p id="ir-missing" class="card hint warn" hidden>The incident report form isn't in this app's data yet. Run tools/lock_assets.py and deploy the new bundle.</p>
+      <section class="card">
+        <h2>Report</h2>
+        <label class="field"><span>Reported by</span><input name="Reported By" autocomplete="name"></label>
+        <div class="grid g2">
+          <label class="field"><span>Block / site</span><input name="Block/Site"></label>
+          <label class="field"><span>Date reported</span><input type="date" name="Date Reported"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Incident</h2>
+        <fieldset class="checks cols">
+          <legend>Incident type</legend>
+          <label><input type="checkbox" name="Type Emergency"> Emergency</label>
+          <label><input type="checkbox" name="Type Traffic"> Traffic</label>
+          <label><input type="checkbox" name="Type Waterfront"> Waterfront</label>
+          <label><input type="checkbox" name="Type Disturbance"> Disturbance</label>
+          <label><input type="checkbox" name="Type Suspicious Activity"> Suspicious activity</label>
+          <label><input type="checkbox" name="Type Public Assistance"> Public assistance</label>
+          <label><input type="checkbox" name="Type Pet"> Pet</label>
+          <label><input type="checkbox" name="Type Wildlife"> Wildlife</label>
+          <label><input type="checkbox" name="Type Weather"> Weather / natural disaster</label>
+          <label><input type="checkbox" name="Type Other"> Other</label>
+        </fieldset>
+        <label class="field"><span>Other (describe)</span><input name="Type Other Text" data-checks="Type Other"></label>
+        <div class="grid g3">
+          <label class="field"><span>Date of incident</span><input type="date" name="Incident Date"></label>
+          <label class="field"><span>Time of incident</span><input type="time" name="Incident Time"></label>
+          <label class="field"><span>Location</span><input name="Location"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Parties involved <small>name / role / contact</small></h2>
+          <div class="grid g3 party">
+            <label class="field"><span>1. Name</span><input name="Party 1 Name"></label>
+            <label class="field"><span>Role</span><input name="Party 1 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Party 1 Contact"></label>
+          </div>
+          <div class="grid g3 party">
+            <label class="field"><span>2. Name</span><input name="Party 2 Name"></label>
+            <label class="field"><span>Role</span><input name="Party 2 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Party 2 Contact"></label>
+          </div>
+          <div class="grid g3 party">
+            <label class="field"><span>3. Name</span><input name="Party 3 Name"></label>
+            <label class="field"><span>Role</span><input name="Party 3 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Party 3 Contact"></label>
+          </div>
+      </section>
+
+      <section class="card">
+        <h2>Witnesses <small>name / role / contact</small></h2>
+          <div class="grid g3 party">
+            <label class="field"><span>1. Name</span><input name="Witness 1 Name"></label>
+            <label class="field"><span>Role</span><input name="Witness 1 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Witness 1 Contact"></label>
+          </div>
+          <div class="grid g3 party">
+            <label class="field"><span>2. Name</span><input name="Witness 2 Name"></label>
+            <label class="field"><span>Role</span><input name="Witness 2 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Witness 2 Contact"></label>
+          </div>
+          <div class="grid g3 party">
+            <label class="field"><span>3. Name</span><input name="Witness 3 Name"></label>
+            <label class="field"><span>Role</span><input name="Witness 3 Role"></label>
+            <label class="field"><span>Contact information</span><input name="Witness 3 Contact"></label>
+          </div>
+      </section>
+
+      <section class="card">
+        <h2>Incident description</h2>
+        <label class="field">
+          <span class="sr-only">Incident description</span>
+          <textarea name="Incident Description" rows="8"></textarea>
+        </label>
+        <p class="hint" id="ir-desc-hint"></p>
+        <div class="photos" id="ir-photos-box" hidden>
+          <button type="button" class="button secondary photo-add" id="ir-photo-btn">Add photos</button>
+          <input type="file" id="ir-photo-input" accept="image/*" multiple hidden>
+          <span class="hint" id="ir-photo-hint">Photos go in the shift packet, right after this report.</span>
+          <div class="photo-thumbs" id="ir-photos"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Police</h2>
+        <div class="grid g2">
+          <label class="field"><span>Police report filed?</span>
+            <select name="Police Report Filed"><option value=""></option><option>Yes</option><option>No</option></select>
+          </label>
+          <label class="field"><span>Precinct</span><input name="Precinct"></label>
+          <label class="field"><span>Reporting officer</span><input name="Reporting Officer"></label>
+          <label class="field"><span>Phone</span><input name="Officer Phone" type="tel"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Follow-up action required</h2>
+        <label class="field">
+          <span class="sr-only">Follow-up action required</span>
+          <textarea name="Follow-up Action" rows="3"></textarea>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>Signature</h2>
+        <p class="hint">The person who witnessed the incident signs. Leave blank to sign the printed copy by hand. Management signs later.</p>
+        <div class="field sig" data-input="Signature Drawing">
+          <span id="ir-sig-label">Signature <small>— sign with a finger or stylus</small></span>
+          <canvas class="sig-pad" role="img" aria-labelledby="ir-sig-label"></canvas>
+          <input type="hidden" name="Signature Drawing">
+          <button type="button" class="link-btn sig-clear">Clear signature</button>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="button" id="ir-new-btn" class="secondary">New report</button>
+        <button type="button" id="ir-packet-btn" class="pdf-action" hidden>Add to packet</button>
+        <button type="button" id="ir-share-btn" class="pdf-action" hidden>Share / Print / Save</button>
+        <a id="ir-download-main" class="button pdf-action" hidden>Download PDF</a>
+      </div>
+      <p id="ir-pdf-status" class="hint center" aria-live="polite"></p>
+      <div id="ir-pdf-result" class="pdf-result" hidden>
+        <a id="ir-download-link" class="button secondary pdf-action">Download</a>
+        <a id="ir-open-link" class="button secondary pdf-action" target="_blank" rel="noopener">Open</a>
       </div>
     </form>
 
@@ -457,6 +597,22 @@
         </div>
       </section>
 
+      <section class="card packet" aria-labelledby="packet-title">
+        <h2 id="packet-title">Shift packet</h2>
+        <p class="hint" id="packet-summary"></p>
+        <ul class="packet-list" id="packet-list"></ul>
+        <div class="photos">
+          <button type="button" class="button secondary photo-add" id="sr-photo-btn">Add shift photos</button>
+          <input type="file" id="sr-photo-input" accept="image/*" multiple hidden>
+          <div class="photo-thumbs" id="packet-photos"></div>
+        </div>
+        <div class="pdf-result">
+          <a id="packet-submit" class="button pdf-action" hidden>Submit packet</a>
+        </div>
+        <p id="packet-files" class="hint center"></p>
+        <p id="packet-status" class="hint center" aria-live="polite"></p>
+      </section>
+
       <div id="sr-pdf-result" class="pdf-result" hidden>
         <a id="sr-download" class="button pdf-action" hidden>Download PDF</a>
         <a id="sr-open-link" class="button secondary pdf-action" target="_blank" rel="noopener">Open</a>
@@ -471,9 +627,12 @@
   <script src="src/vault.js"></script>
   <script src="src/fill-citation.js"></script>
   <script src="src/fill-shift-report.js"></script>
+  <script src="src/fill-incident.js"></script>
   <script src="src/common.js"></script>
+  <script src="src/packet.js"></script>
   <script src="src/citation.js"></script>
   <script src="src/shift-report.js"></script>
+  <script src="src/incident.js"></script>
   <script src="src/app.js"></script>
 </body>
 </html>

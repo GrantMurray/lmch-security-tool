@@ -222,14 +222,18 @@ function makeSignaturePad(box, input, onChange) {
 // ---- PDF -----------------------------------------------------------------
 
 const installedApp = () => window.matchMedia("(display-mode: standalone)").matches || !!navigator.standalone;
-const canShareFile = (file) => !!(navigator.canShare && navigator.canShare({ files: [file] }));
+const canShareFiles = (files) => !!(navigator.canShare && navigator.canShare({ files }));
+const canShareFile = (file) => canShareFiles([file]);
 
 // Rebuilds a form's PDF shortly after every change, so Download / Share /
 // Open always hand out the current version. Builds never overlap; changes
-// made during one trigger another when it finishes. Returns the scheduler.
+// made during one trigger another when it finishes. Returns the scheduler;
+// schedule.idle() resolves (true if the last build worked) once the PDF is
+// up to date.
 function livePdf(form, status, build) {
   const DELAY = 250;
-  let timer = null, building = false, dirty = false;
+  let timer = null, building = false, dirty = false, ok = false;
+  let waiters = [];
 
   function schedule() {
     dirty = true;
@@ -242,17 +246,23 @@ function livePdf(form, status, build) {
     if (building) return;
     building = true;
     dirty = false;
+    ok = false;
     try {
       await build();
+      ok = true;
     } catch (err) {
       console.error(err);
       status.textContent = `Couldn't update the PDF: ${err.message}`;
     } finally {
       building = false;
       if (dirty) schedule();
-      else form.classList.remove("stale");
+      else {
+        form.classList.remove("stale");
+        waiters.splice(0).forEach((resolve) => resolve(ok));
+      }
     }
   }
 
+  schedule.idle = () => (dirty || building ? new Promise((resolve) => waiters.push(resolve)) : Promise.resolve(ok));
   return schedule;
 }

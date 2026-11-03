@@ -80,6 +80,7 @@ const ShiftReport = (() => {
     $("#sr-open-link").href = lastUrl;
     $("#sr-pdf-result").hidden = false;
     $("#sr-pdf-status").textContent = `${name} is up to date.`;
+    await buildPacket(lastFile, date);
   });
 
   async function downloadPdf(e) {
@@ -89,6 +90,176 @@ const ShiftReport = (() => {
       await navigator.share({ files: [lastFile] });
     } catch (err) {
       if (err.name !== "AbortError") $("#sr-pdf-status").textContent = `Couldn't save the PDF: ${err.message}`;
+    }
+  }
+
+  // ---- Shift packet --------------------------------------------------------
+  // The packet is this report plus every citation, incident report and photo
+  // added to it, each submitted as its own file (see Packet.files for the
+  // order and names). Phones and tablets share the files; desktops download
+  // them in one .zip. It's rebuilt alongside the report, so Submit can open
+  // the share sheet straight away: iOS only allows that right after a tap,
+  // with no waiting in between.
+
+  let packetItems = [];
+  let packetFiles = [];
+  let zipUrl = null;
+  const shownCounts = {}; // totals last filled in from the packet, by field
+
+  const packetDocs = () => packetItems.filter((i) => !Packet.isPhoto(i));
+  const packetCitations = () => packetDocs().filter((i) => i.type !== "incident");
+  const packetIncidents = () => packetDocs().filter((i) => i.type === "incident");
+  const packetPhotos = () => packetItems.filter(Packet.isPhoto);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  // "a", "a and b", "a, b and c"
+  const listOf = (parts) => parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : parts.join("");
+
+  // What a set of packet items holds, e.g. "2 citations and 3 photos".
+  function describe(items) {
+    const docs = items.filter((i) => !Packet.isPhoto(i));
+    const incidents = docs.filter((i) => i.type === "incident").length;
+    const photos = items.length - docs.length;
+    return listOf([
+      docs.length - incidents && plural(docs.length - incidents, "citation"),
+      incidents && plural(incidents, "incident report"),
+      photos && plural(photos, "photo"),
+    ].filter(Boolean));
+  }
+
+  async function buildPacket(reportFile, date) {
+    packetFiles = Packet.files(reportFile, packetItems, date);
+    const btn = $("#packet-submit");
+    if (zipUrl) URL.revokeObjectURL(zipUrl);
+    zipUrl = null;
+    if (sharesPacket()) {
+      btn.href = "#";
+      btn.removeAttribute("download");
+    } else {
+      const name = `shift-packet-${date}`;
+      zipUrl = URL.createObjectURL(await Packet.zip(packetFiles, name));
+      btn.href = zipUrl;
+      btn.download = `${name}.zip`;
+    }
+    btn.hidden = false;
+    $("#packet-files").textContent = `Submit sends ${plural(packetFiles.length, "separate file")}` +
+      (sharesPacket() ? "." : ` (downloaded together in one .zip).`);
+  }
+
+  function renderPacket() {
+    const docs = packetDocs();
+    const photos = packetPhotos();
+    $("#packet-summary").textContent = packetItems.length
+      ? `This report plus ${describe(packetItems)}. Submit at the end of the shift.`
+      : "Nothing added yet: use Add to packet on the Citation or Incident report tab. Submitting now sends just this report.";
+    const list = $("#packet-list");
+    list.innerHTML = "";
+    for (const item of docs) {
+      const own = photos.filter((p) => p.doc === item.id);
+      const li = document.createElement("li");
+      const text = document.createElement("span");
+      text.textContent = (item.summary || item.name) + (own.length ? ` · ${plural(own.length, "photo")}` : "");
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "link-btn";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", async () => {
+        const also = own.length ? ` and its ${plural(own.length, "photo")}` : "";
+        if (confirm(`Remove ${item.label || `Citation ${item.id}`}${also} from the packet?`)) {
+          await Packet.removeMany([item.id, ...own.map((p) => p.id)]);
+        }
+      });
+      li.append(text, remove);
+      list.append(li);
+    }
+    // Shift photos, and photos of documents that aren't in the packet.
+    const ids = new Set(docs.map((d) => d.id));
+    Packet.renderThumbs($("#packet-photos"), photos.filter((p) => !p.doc || !ids.has(p.doc)));
+  }
+
+  // The citations and incident reports totals follow the packet until
+  // someone types their own. Returns true if a total changed.
+  function syncTotal(totalName, boxName, n) {
+    const total = field(totalName);
+    const shown = shownCounts[totalName];
+    const auto = !total.value.trim() || total.value === String(shown ?? n);
+    shownCounts[totalName] = n;
+    if (!auto || total.value === (n ? String(n) : "")) return false;
+    total.value = n ? String(n) : "";
+    if (n) field(boxName).checked = true;
+    else if (shown) field(boxName).checked = false;
+    return true;
+  }
+
+  const syncTotals = () => [
+    syncTotal("Citations Total", "Citations", packetCitations().length),
+    syncTotal("Incident Reports Total", "Incident Reports", packetIncidents().length),
+  ].some(Boolean);
+
+  async function refreshPacket() {
+    try {
+      packetItems = await Packet.list();
+    } catch (err) {
+      console.error(err);
+      $("#packet-status").textContent = `Couldn't read the packet: ${err.message}`;
+      packetItems = [];
+    }
+    renderPacket();
+    if (syncTotals()) changed();
+    else schedulePdf();
+  }
+
+  // Phones and tablets get the share sheet; elsewhere the link downloads.
+  const touchDevice = () => window.matchMedia("(pointer: coarse)").matches;
+  const sharesPacket = () => touchDevice() && canShareFiles(packetFiles);
+
+  async function submitPacket(e) {
+    const status = $("#packet-status");
+    if (!packetFiles.length) { e.preventDefault(); return; }
+    if (form.classList.contains("stale")) {
+      e.preventDefault();
+      status.textContent = "The packet is still updating. Try again in a moment.";
+      return;
+    }
+    const items = packetItems;
+    const files = packetFiles;
+    if (sharesPacket()) {
+      e.preventDefault();
+      try {
+        await navigator.share({ files });
+      } catch (err) {
+        if (err.name !== "AbortError") status.textContent = `Couldn't share the packet: ${err.message}`;
+        return;
+      }
+    }
+    status.textContent = `Submitted ${plural(files.length, "file")}.`;
+    // Let the download start before asking.
+    setTimeout(() => offerClear(items), 300);
+  }
+
+  async function offerClear(items) {
+    if (!items.length) return;
+    if (!confirm(`Remove the submitted ${describe(items)} from the packet?`)) return;
+    // Only what was submitted: anything added since stays for next time.
+    await Packet.removeMany(items.map((i) => i.id));
+  }
+
+  async function addShiftPhotos(e) {
+    e.stopPropagation(); // the report itself doesn't change
+    const input = e.target;
+    if (!input.files.length) return;
+    const status = $("#packet-status");
+    const btn = $("#sr-photo-btn");
+    btn.disabled = true;
+    status.textContent = "Adding photos…";
+    try {
+      const n = await Packet.addPhotos(input.files, { label: "Shift photo" });
+      status.textContent = `${plural(n, "photo")} added to the packet.`;
+    } catch (err) {
+      console.error(err);
+      status.textContent = `Couldn't add the photos: ${err.message}`;
+    } finally {
+      input.value = "";
+      btn.disabled = false;
     }
   }
 
@@ -105,6 +276,11 @@ const ShiftReport = (() => {
     form.addEventListener("change", changed);
     form.addEventListener("submit", (e) => e.preventDefault());
     $("#sr-download").addEventListener("click", downloadPdf);
+    $("#packet-submit").addEventListener("click", submitPacket);
+    Packet.onChange(refreshPacket);
+    $("#sr-photo-btn").addEventListener("click", () => $("#sr-photo-input").click());
+    for (const type of ["input", "change"]) $("#sr-photo-input").addEventListener(type, (e) => e.stopPropagation());
+    $("#sr-photo-input").addEventListener("change", addShiftPhotos);
     $("#sr-new-btn").addEventListener("click", () => {
       if (confirm("Clear this report and start a new one?")) newReport();
     });
@@ -114,7 +290,11 @@ const ShiftReport = (() => {
   function start() {
     if (!restoreDraft(form, STORE.draft)) applyDefaults();
     updateJournalHint();
-    schedulePdf();
+    if (Packet.isSupported()) refreshPacket();
+    else {
+      $("#packet-summary").textContent = "This browser can't keep a packet.";
+      schedulePdf();
+    }
   }
 
   return { init, start };

@@ -1,18 +1,20 @@
 # Security Tool
 
-Web app for Lake Merwin Campers Hideaway security staff. It combines two
-tools behind one access code, switched with the tabs at the top:
+Web app for Lake Merwin Campers Hideaway security staff. It combines three
+tools behind one access code, switched with the dropdown in the header:
 
 - **Citation**: violation notices. Pick a site on the camp map (or type it),
   fill in the rest, and download a 4×6 PDF.
 - **Shift report**: the security checklist and journal, laid out like the
   paper form, downloaded as a two-page PDF.
+- **Incident report**: the LMCH incident report form, with a drawn
+  signature, downloaded as a two-page PDF.
 
 The PDFs are flattened: answers are printed on the page, not left as editable
 form fields.
 
-The open tool is in the URL hash, so `…/#citation` and `…/#shift-report` open
-one directly; otherwise the app opens the tool used last on that device.
+The open tool is in the URL hash, so `…/#shift-report`, `…/#citation` and
+`…/#incident` open one directly; otherwise the app opens the tool used last on that device.
 
 ## Run
 
@@ -83,18 +85,22 @@ index.html                  app entry point (both tools' forms)
 manifest.webmanifest        install metadata (name, icons)
 sw.js                       service worker: offline cache
 src/
-  app.js                    access code, tool tabs, theme, offline status
+  app.js                    access code, form picker, theme, offline status
   common.js                 shared helpers: drafts, signature pads, live PDF rebuild
+  packet.js                 shift packet: citations and photos stored until submitted
   citation.js               citation: map picker, fines list, autofill
   shift-report.js           shift report: journal hint, PDF download/share
+  incident.js               incident report: description hint, PDF download/share
   fill-citation.js          fills the citation PDF template (pdf-lib)
   fill-shift-report.js      fills the shift-report PDF template (pdf-lib)
+  fill-incident.js          fills the incident-report PDF template (pdf-lib)
   vault.js                  access code: decrypts the bundle, remembers the key
   style.css
 assets/
   locked/bundle.bin                 encrypted forms, site list and maps (committed)
   forms/citation_fillable.pdf       4×6 fillable citation template   (local only)
   forms/shift_report_fillable.pdf   fillable shift-report template   (local only)
+  forms/incident_report_fillable.pdf  fillable incident-report template (local only)
   maps/camp_map_2024.pdf            source camp map                  (local only)
   maps/pages/                       rendered block maps              (local only)
   data/numbers.csv                  site positions on each block map (local only)
@@ -134,10 +140,18 @@ widget — field name plus widget index — and prints it at that widget's
 position, then removes the form. If the template's layout changes, update the
 `TEXT`, `CHECKS`, `YES_NO` and `WRAPPED` tables there.
 
+### Incident-report template
+
+The incident report is filled the same way, by `src/fill-incident.js`: its
+fields have unhelpful names ("1", "undefined_2", "Text5") and auto-sized
+text. The incident description starts in the box on page 1 and continues in
+the box at the top of page 2, shrinking if it still doesn't fit. The
+management signature and date are left for management to sign on paper.
+
 ## Notes
 
 - Each tool keeps its own draft (per browser, in localStorage), so a citation
-  or a report in progress survives switching tabs or closing the app. Drawn
+  or report in progress survives switching forms or closing the app. Drawn
   signatures are never saved on the device (not even in the draft).
 - **Citation numbers:** the next citation number, the device code and the
   "Issued by" name are remembered per browser. Give each device its own
@@ -149,8 +163,30 @@ position, then removes the form. If the template's layout changes, update the
   (replacing what was there); *Manual* shows the category boxes. Each mode
   keeps its own description of violation. The choice is remembered per device.
   When the list changes, edit `fines.csv` and re-run `tools/lock_assets.py`.
+- **Incident report:** "Reported by" is remembered per browser once a report
+  has been shared, downloaded or added to the packet. Each report gets an id
+  when it's started (e.g. IR-261102-2245), used in its file name.
 - **Shift report:** the security journal wraps across the PDF's 18 ruled
   lines; longer entries print in smaller text to fit. Area comments wrap
   across their two lines.
+- **Shift packet:** on the Citation and Incident report tabs, **Add to
+  packet** keeps that document's PDF on the device (in IndexedDB). Editing it
+  afterwards shows **Update in packet** to replace the stored copy. The Shift
+  packet section at the bottom of the shift report lists them (each can be
+  removed) and fills in the citations and incident reports totals. **Submit
+  packet** hands over every document and photo as its own file, so each can
+  be saved and filed separately: on phones and tablets it opens the share
+  sheet with all of them (Save to Files saves each one), and elsewhere it
+  downloads one uncompressed `.zip` holding them in a `shift-packet-<date>`
+  folder. Photos are named after what they go with, e.g.
+  `citation-001-100000-B4-S23-photo-1.jpg` or `shift-11-02-2026-photo-1.jpg`. Afterwards the app offers to remove
+  what was submitted from the packet. Unlike drafts, packet documents include
+  their drawn signatures, so they stay on the device until removed.
+- **Photos:** **Add photos** on a citation (next to Pictures attached) or an
+  incident report (under the description) puts them in the packet linked to
+  that document, named after it; on a citation it also ticks Pictures
+  attached: Yes. **Add shift photos** in the Shift packet section adds
+  general photos. Photos are shrunk to 1600 px JPEGs before they're stored.
+  Removing a document from the packet removes its photos too.
 - The sun/moon button switches light and dark mode. It follows the device
   setting until used, then remembers the choice on that device.

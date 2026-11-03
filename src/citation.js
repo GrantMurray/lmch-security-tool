@@ -511,6 +511,7 @@ const Citation = (() => {
 
   // Called whenever the citation changes: keep the draft and the PDF current.
   function changed() {
+    packet?.edited(); // a changed citation has to be added again
     saveDraft(form, STORE.draft);
     schedulePdf();
   }
@@ -548,6 +549,7 @@ const Citation = (() => {
   let lastUrl = null;
   let lastFile = null;
   let lastValues = null;
+  let lastNumber = null; // the printed number, e.g. 001-100000
 
   // Phones and tablets get a share sheet (Save to Files, Print, AirDrop...);
   // downloads from an installed iOS web app are unreliable.
@@ -584,7 +586,31 @@ const Citation = (() => {
     $("#cg-download-link").hidden = !share;
     $("#cg-pdf-result").hidden = false;
     $("#cg-pdf-status").textContent = `${name} is up to date. Print at actual size (100%).`;
+    lastNumber = num;
+    await packet.built(num);
   });
+
+  // ---- Shift packet --------------------------------------------------------
+  // "Add to packet" keeps this citation's PDF on the device until the packet
+  // is submitted with the shift report, and "Add photos" adds photos to go
+  // with it (see Packet.controls). Changing the citation afterwards means
+  // adding it again, which replaces it.
+
+  let packet = null;
+
+  function packetDoc() {
+    const v = lastValues;
+    return {
+      id: lastNumber, type: "citation", label: `Citation ${lastNumber}`, file: lastFile,
+      summary: [`Citation #${lastNumber}`, locationText(), v["Item Number"] || v["Name"]].filter(Boolean).join(" · "),
+    };
+  }
+
+  // Photos of the violation mean "Pictures attached: Yes" on the citation.
+  function picturesAdded() {
+    const pictures = form.elements.namedItem("Pictures Attached");
+    if (pictures.value !== "Yes") { pictures.value = "Yes"; changed(); }
+  }
 
   // Once the PDF has been handed out, remember the issuer and move on to the
   // next citation number for the next "New citation".
@@ -667,8 +693,15 @@ const Citation = (() => {
     $("#cg-download-main").addEventListener("click", pdfUsed);
     $("#cg-download-link").addEventListener("click", pdfUsed);
     $("#cg-open-link").addEventListener("click", pdfUsed);
+    packet = Packet.controls({
+      prefix: "cg", status: $("#cg-pdf-status"), idle: () => schedulePdf.idle(), current: packetDoc,
+      onAdded: pdfUsed, onPhotos: picturesAdded, next: "Tap New citation for the next one.",
+    });
     $("#cg-new-btn").addEventListener("click", () => {
-      if (confirm("Clear this citation and start a new one?")) newCitation();
+      const message = packet.inPacket
+        ? "Clear this citation and start a new one?"
+        : "This citation isn't in the shift packet. Clear it and start a new one anyway?";
+      if (confirm(message)) newCitation();
     });
   }
 

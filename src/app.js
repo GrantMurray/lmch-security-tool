@@ -1,18 +1,21 @@
 "use strict";
 
 // App shell: access code, switching between the tools, theme, offline.
-// The tools themselves are in citation.js and shift-report.js.
+// The tools themselves are in shift-report.js, citation.js and incident.js.
 
+// In the order they're listed in the header's dropdown.
 const TOOLS = {
-  citation: { title: "Violation Notice", form: "#citation", module: Citation },
   "shift-report": { title: "Shift Report", form: "#report", module: ShiftReport },
+  citation: { title: "Citation", form: "#citation", module: Citation },
+  incident: { title: "Incident Report", form: "#incident", module: Incident },
 };
 const DEFAULT_TOOL = "shift-report";
 const APP_STORE = { theme: "st.theme", tool: "st.tool" };
 
 // ---- Tools -----------------------------------------------------------------
-// The open tool is in the URL hash (#citation, #shift-report), so a link or
-// bookmark can open either one; otherwise the last one used comes back.
+// The header's title is a dropdown for switching between the tools. The open
+// tool is in the URL hash (#shift-report, #citation, #incident), so a link or
+// bookmark can open any one; otherwise the last one used comes back.
 
 let currentTool = null;
 const scrollPos = {}; // each tool keeps its own scroll position
@@ -27,21 +30,19 @@ function showTool(name) {
   if (name === currentTool) return;
   if (currentTool) scrollPos[currentTool] = window.scrollY;
   currentTool = name;
-  for (const [key, tool] of Object.entries(TOOLS)) {
-    $(tool.form).hidden = key !== name;
-    $(`#tab-${key}`).setAttribute("aria-selected", key === name);
-  }
-  $("#app-title").textContent = TOOLS[name].title;
+  for (const [key, tool] of Object.entries(TOOLS)) $(tool.form).hidden = key !== name;
+  $("#tool-select").value = name;
+  $("#tool-name").textContent = TOOLS[name].title;
   document.title = `${TOOLS[name].title} · Security Tool`;
   store.set(APP_STORE.tool, name);
   if (toolFromHash() !== name) history.replaceState(null, "", `#${name}`);
   window.scrollTo(0, scrollPos[name] || 0);
 }
 
-function setUpTabs() {
-  for (const key of Object.keys(TOOLS)) {
-    $(`#tab-${key}`).addEventListener("click", () => showTool(key));
-  }
+function setUpToolPicker() {
+  const select = $("#tool-select");
+  for (const [key, tool] of Object.entries(TOOLS)) select.append(new Option(tool.title, key));
+  select.addEventListener("change", () => showTool(select.value));
   window.addEventListener("hashchange", () => { if (toolFromHash()) showTool(toolFromHash()); });
   showTool(toolFromHash() || store.get(APP_STORE.tool) || DEFAULT_TOOL);
 }
@@ -50,6 +51,8 @@ function setUpTabs() {
 
 function showLock(message = "") {
   $("#tools").hidden = true;
+  $("#tool-pick").hidden = true;
+  $("#app-title").hidden = false;
   $("#lock-btn").hidden = true;
   $("#lock").hidden = false;
   $("#lock-error").textContent = message;
@@ -139,6 +142,8 @@ let started = false;
 function start() {
   $("#lock").hidden = true;
   $("#tools").hidden = false;
+  $("#tool-pick").hidden = false;
+  $("#app-title").hidden = true;
   $("#lock-btn").hidden = false;
   if (started) return;
   started = true;
@@ -150,7 +155,7 @@ async function init() {
   store.del("cg.staffSig");
   store.del("sr.employee");
   setUpThemeSwitch();
-  setUpTabs();
+  setUpToolPicker();
   for (const tool of Object.values(TOOLS)) tool.module.init();
   // iOS puts focus back in the last field when the app wakes from sleep,
   // popping up the keyboard. Let go of it whenever the app is hidden.

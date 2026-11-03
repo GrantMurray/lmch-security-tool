@@ -6,7 +6,7 @@
 // background, so a device picks up new versions the next time it opens the
 // app with a connection.
 // Bump VERSION to force every device to re-download everything.
-const VERSION = "v1";
+const VERSION = "v3";
 const CACHE = `security-tool-${VERSION}`;
 
 const SHELL = [
@@ -15,11 +15,14 @@ const SHELL = [
   "manifest.webmanifest",
   "src/app.js",
   "src/common.js",
+  "src/packet.js",
   "src/citation.js",
   "src/shift-report.js",
+  "src/incident.js",
   "src/vault.js",
   "src/fill-citation.js",
   "src/fill-shift-report.js",
+  "src/fill-incident.js",
   "src/style.css",
   "vendor/pdf-lib.min.js",
   "assets/locked/bundle.bin",
