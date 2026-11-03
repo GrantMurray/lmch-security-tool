@@ -1,0 +1,316 @@
+:root {
+  color-scheme: light;
+  --ink: #1f2a36;
+  --muted: #5b6673;
+  --line: #d5dae0;
+  --bg: #f3f5f7;
+  --card: #ffffff;
+  --field: #ffffff;
+  --paper: #ffffff; /* map and signature pads stay paper-white in both themes */
+  --paper-line: #d5dae0;
+  --accent: #1d5fa8;
+  --accent-ink: #ffffff;
+  --hit: rgba(29, 95, 168, 0.18);
+  --picked: #d8262e;
+  --picked-fill: rgba(216, 38, 46, 0.15);
+  --ok: #1c7a3e;
+  --warn: #9a5b00;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ink: #f2f5f7;
+    --muted: #b9c2cb;
+    --line: #6b7785;
+    --bg: #0d1114;
+    --card: #1a2026;
+    --field: #12171b;
+    --accent: #6aa5ea;
+    --accent-ink: #0c1622;
+    --hit: rgba(106, 165, 234, 0.25);
+    --ok: #7ee0a6;
+    --warn: #f2b65e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f2f5f7;
+  --muted: #b9c2cb;
+  --line: #6b7785;
+  --bg: #0d1114;
+  --card: #1a2026;
+  --field: #12171b;
+  --accent: #6aa5ea;
+  --accent-ink: #0c1622;
+  --hit: rgba(106, 165, 234, 0.25);
+  --ok: #7ee0a6;
+  --warn: #f2b65e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line);
+}
+.topbar-logo { width: 56px; height: auto; padding: 2px; border-radius: 8px; background: var(--paper); }
+.topbar h1 { margin: 0; font-size: 1.25rem; letter-spacing: 0.02em; }
+.topbar p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.topbar-title { flex: 1; }
+.lock-btn, .theme-btn {
+  font: inherit; font-size: 0.9rem; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--field); color: var(--ink);
+}
+.theme-btn { display: grid; place-items: center; width: 40px; height: 38px; padding: 0; }
+.theme-btn svg { width: 20px; height: 20px; }
+[hidden] { display: none !important; }
+
+.lock { max-width: 420px; margin: 40px auto; padding: 0 16px; }
+.lock-card button[type=submit] {
+  width: 100%; font: inherit; font-weight: 600; padding: 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); margin: 6px 0 10px;
+}
+.remember { display: flex; align-items: center; gap: 8px; margin: 4px 0 10px; }
+.remember input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+#citation, #report { margin: 0 auto; padding: 16px 16px calc(40px + env(safe-area-inset-bottom)); }
+#citation { max-width: 920px; }
+#report { max-width: 1100px; }
+
+/* ---- Tool tabs ---------------------------------------------------- */
+.tabs {
+  display: flex; max-width: 420px; margin: 16px auto 0; padding: 0 16px;
+}
+.tabs button {
+  flex: 1; font: inherit; font-weight: 600; padding: 10px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--field); color: var(--ink);
+}
+.tabs button:first-child { border-radius: 8px 0 0 8px; }
+.tabs button:last-child { border-radius: 0 8px 8px 0; border-left: 0; }
+.tabs button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px 16px; margin-bottom: 14px;
+}
+.card h2 { margin: 0 0 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.card h2 small, .field small { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--muted); }
+
+.field { display: block; margin-bottom: 10px; }
+.field > span { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 3px; }
+input:not([type=checkbox]):not([type=radio]), textarea, select {
+  width: 100%; font: inherit; color: inherit; padding: 9px 10px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--field);
+}
+input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+textarea { resize: vertical; }
+select { appearance: auto; min-height: 42px; }
+
+/* ---- Citation: cards ---------------------------------------------- */
+.grid { display: grid; gap: 0 12px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 560px) {
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.checks { border: 0; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.checks legend { font-size: 0.85rem; color: var(--muted); padding: 0; margin-bottom: 4px; }
+.checks.cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.checks label { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
+.checks input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* Two-way switch: radios drawn as a segmented button. */
+.mode-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 0; margin: 0 0 12px; overflow: hidden; }
+.mode-switch label { position: relative; padding: 8px 14px; font-size: 0.9rem; cursor: pointer; background: var(--field); }
+.mode-switch label + label { border-left: 1px solid var(--line); }
+.mode-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.mode-switch label:has(input:checked) { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.mode-switch label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+.mode-switch[hidden], #cat-auto[hidden], #cat-manual[hidden] { display: none; }
+
+/* ---- Shift report: paper-form layout ------------------------------ */
+/* The report is laid out like the printed form: two pages, inline labels,
+   answers written on underlined blanks and ruled lines. */
+.sheet {
+  --rule: var(--line);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 32px 24px; margin-bottom: 18px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+}
+@media (max-width: 600px) { .sheet { padding: 18px 16px; } }
+
+.doc-head { margin-bottom: 18px; }
+.doc-title {
+  margin: 0 0 6px; font-size: 1.4rem; font-weight: 700; text-transform: uppercase;
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.doc-subtitle { margin: 0; font-size: 1.2rem; text-transform: uppercase; }
+.sec { margin: 26px 0 10px; font-size: 1.25rem; }
+.sec.first { margin-top: 0; }
+
+/* A row of inline label + blank pairs that wraps on narrow screens. */
+.line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 46px; }
+.sep { color: var(--muted); }
+.blank, .t { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.blank.grow { flex: 1 1 260px; min-width: 0; }
+.stack { display: block; margin: 8px 0 4px; }
+
+/* Blanks: just an underline, like the paper form. */
+.sheet input:not([type=checkbox]):not([type=radio]), .sheet select {
+  width: auto; height: 40px; padding: 4px 6px; border: 0; border-bottom: 1.5px solid var(--muted);
+  border-radius: 0; background: transparent; color: var(--accent);
+}
+.sheet .stack > input:not([type=checkbox]) { display: block; width: 100%; margin-top: 2px; }
+.sheet .blank.grow input { flex: 1; min-width: 0; }
+.sheet .blank.short input { width: 5.5rem; }
+.sheet input:focus, .sheet select:focus, .sheet textarea:focus { outline: none; border-bottom-color: var(--accent); }
+.sheet input:focus-visible, .sheet select:focus-visible { box-shadow: 0 2px 0 var(--accent); }
+.sheet select { min-width: 6.5rem; }
+
+/* Comments and journal are written on ruled lines. */
+.sheet textarea.ruled {
+  --lh: 26px; /* iPad Safari draws the caret as tall as the line */
+  display: block; width: 100%; height: calc(var(--lines) * var(--lh) + 2px);
+  padding: 0 6px; border: 0; border-radius: 0; resize: none; line-height: var(--lh);
+  color: var(--accent); background: transparent
+    linear-gradient(transparent calc(var(--lh) - 1px), var(--rule) calc(var(--lh) - 1px), var(--rule) var(--lh), transparent var(--lh))
+    0 0 / 100% var(--lh) local;
+}
+.sheet textarea.ruled:focus { box-shadow: inset 3px 0 0 var(--accent); }
+
+.box { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.box input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+
+/* ---- Security rounds: two columns, as on the paper form ----------- */
+.zones { display: grid; gap: 22px 36px; }
+@media (min-width: 700px) { .zones { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.area { container-type: inline-size; }
+.area h3 { margin: 0 0 4px; font-size: 1.02rem; }
+.area .sites { font-weight: 700; }
+.area h4 { margin: 14px 0 0; font-size: 1rem; }
+.facility { margin: 6px 0 4px; }
+
+/* Check point name, then "1: [time] 2: [time]" right after it; the name gets
+   its own line when the column is too narrow for all three. */
+.round { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; padding: 2px 0; }
+.round-name { flex-basis: 100%; padding-top: 6px; }
+@container (min-width: 420px) {
+  .round-name { flex-basis: auto; padding-top: 0; }
+}
+.t > span:first-child { color: var(--muted); }
+.sheet input[type=time] { width: 6.5rem; padding-inline: 2px; }
+/* Chrome's clock icon crowds the time; typing covers it. */
+.sheet input[type=time]::-webkit-calendar-picker-indicator { display: none; }
+
+/* ---- End of shift -------------------------------------------------- */
+.indent { padding-left: 2rem; }
+@media (max-width: 600px) { .indent { padding-left: 0.75rem; } }
+.indent > .box { display: flex; }
+.turn-in { margin: 4px 0 0; }
+.sheet .sig { margin-top: 22px; }
+.sheet .sig > span { display: block; margin-bottom: 6px; }
+.sheet .sig small { color: var(--muted); }
+.hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 10px; }
+.hint.ok { color: var(--ok); }
+.hint.warn { color: var(--warn); }
+.center { text-align: center; }
+
+/* ---- Citation: map ------------------------------------------------ */
+.map-pages { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.map-pages button {
+  flex: none; min-width: 40px; font: inherit; font-size: 0.85rem; padding: 6px 8px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--field); color: var(--ink); cursor: pointer;
+}
+.map-pages button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.map-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; margin: 6px 0; }
+.map-title { font-weight: 600; white-space: nowrap; }
+.map-title small { font-size: inherit; font-weight: 600; color: var(--picked); }
+.map-tools { display: flex; gap: 6px; flex: none; }
+.map-tools button {
+  display: grid; place-items: center; min-width: 38px; height: 38px; padding: 0 8px;
+  font: inherit; font-size: 1.2rem; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--field); color: var(--ink); cursor: pointer;
+}
+.map-tools button:disabled { opacity: 0.4; cursor: default; }
+.map-tools svg { width: 18px; height: 18px; }
+.map-tools .map-full-btn { font-size: 0.9rem; font-weight: 600; }
+
+/* The canvas is panned and scaled with a transform; --inv undoes the scale
+   for things that should stay the same size on screen. */
+.map-viewport {
+  position: relative; overflow: hidden; aspect-ratio: 2200 / 1700;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--paper);
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: pointer;
+}
+.map-viewport.zoomed { touch-action: none; cursor: grab; }
+.map-viewport.dragging { cursor: grabbing; }
+.map-canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; --inv: 1; }
+.map-canvas.animate { transition: transform 0.25s ease; }
+.map-canvas img { display: block; width: 100%; height: auto; -webkit-user-drag: none; }
+#hotspots { position: absolute; inset: 0; }
+.site {
+  position: absolute; padding: 0; margin: 0; border: 0; border-radius: 3px;
+  background: transparent; pointer-events: none; /* taps are matched to the nearest site */
+}
+.site:focus-visible { background: var(--hit); outline: calc(2px * var(--inv)) solid var(--accent); }
+.site.picked { background: var(--picked-fill); outline: calc(2px * var(--inv)) solid var(--picked); }
+.map-pin {
+  position: absolute; width: 34px; height: 34px; border-radius: 50%; pointer-events: none;
+  border: 3px solid var(--picked); box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(216, 38, 46, 0.25);
+  transform: translate(-50%, -50%) scale(var(--inv));
+}
+.map-help { margin: 6px 0 0; }
+
+/* Full-screen map */
+.map.full {
+  position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column;
+  padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--card);
+}
+.map.full .map-viewport { flex: 1; aspect-ratio: auto; }
+body.map-open { overflow: hidden; }
+
+/* ---- Actions ------------------------------------------------------ */
+.actions { display: flex; gap: 12px; justify-content: flex-end; }
+#report .actions { margin-bottom: 12px; }
+/* The citation's main action stays in reach at the bottom of the screen. */
+#citation .actions {
+  position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--bg) 30%);
+}
+.pdf-result { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 10px; }
+.pdf-result[hidden], .pdf-result [hidden] { display: none; }
+.actions button, .pdf-result button, .button {
+  font: inherit; font-weight: 600; padding: 12px 20px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+}
+.actions button.secondary, .button.secondary { background: var(--field); color: var(--accent); }
+.stale .pdf-action { opacity: 0.6; }
+.button { display: inline-block; text-decoration: none; }
+
+/* ---- Signature pad ------------------------------------------------ */
+.sig-pad {
+  display: block; width: 100%; height: 130px; touch-action: none; cursor: crosshair;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--paper) linear-gradient(transparent 74%, var(--paper-line) 74%, var(--paper-line) calc(74% + 1px), transparent calc(74% + 1px));
+}
+.link-btn {
+  font: inherit; font-size: 0.85rem; padding: 6px 0; border: 0; background: none;
+  color: var(--accent); cursor: pointer; text-decoration: underline;
+}

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sky and hills run past the edges so the maskable icon can be scaled down without gaps. -->
+  <defs>
+    <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="512">
+      <stop offset="0" stop-color="#6fa8dc"/>
+      <stop offset="1" stop-color="#d4e7f5"/>
+    </linearGradient>
+  </defs>
+  <rect x="-140" y="-140" width="792" height="792" fill="url(#sky)"/>
+
+  <!-- Mt. St. Helens with its plume -->
+  <circle cx="268" cy="104" r="22" fill="#fff" opacity=".85"/>
+  <circle cx="292" cy="80" r="26" fill="#fff" opacity=".85"/>
+  <circle cx="320" cy="62" r="20" fill="#fff" opacity=".8"/>
+  <path d="M10 372 L226 140 L290 140 L502 372Z" fill="#7d8fa3"/>
+  <path d="M190 179 L226 140 L290 140 L326 179 L300 168 L280 186 L258 166 L236 186 L214 168Z" fill="#fff"/>
+
+  <!-- Hills -->
+  <path d="M0 352 Q256 300 512 356 L652 387 V652 H-140 V380Z" fill="#2f7a43"/>
+  <path d="M0 410 Q256 380 512 420 L652 442 V652 H-140 V426Z" fill="#256536"/>
+
+  <!-- Pine -->
+  <g fill="#174a2a">
+    <rect x="118" y="400" width="20" height="44"/>
+    <path d="M128 150 L182 250 H154 L198 330 H166 L214 412 H42 L90 330 H58 L102 250 H74Z"/>
+  </g>
+
+  <!-- Checklist sheet -->
+  <rect x="260" y="244" width="196" height="232" rx="22" fill="#1f2a36" opacity=".25"/>
+  <rect x="254" y="236" width="196" height="232" rx="22" fill="#fff"/>
+  <rect x="284" y="270" width="36" height="36" rx="8" fill="#1c7a3e"/>
+  <path d="M293 289l7 7 12-15" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="334" y="282" width="88" height="12" rx="6" fill="#c3cad2"/>
+  <rect x="284" y="330" width="36" height="36" rx="8" fill="#1c7a3e"/>
+  <path d="M293 349l7 7 12-15" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="334" y="342" width="72" height="12" rx="6" fill="#c3cad2"/>
+  <rect x="287" y="393" width="30" height="30" rx="6" fill="none" stroke="#c3cad2" stroke-width="6"/>
+  <rect x="334" y="402" width="80" height="12" rx="6" fill="#c3cad2"/>
+</svg>

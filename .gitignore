@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+.vscode/
+
+# Private source files: only the encrypted bundle (assets/locked/) is published.
+# Keep a backup of these outside the repo.
+assets/forms/
+assets/data/
+assets/maps/
