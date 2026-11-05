@@ -183,7 +183,7 @@
         <div class="photos" id="cg-photos-box" hidden>
           <button type="button" class="button secondary photo-add" id="cg-photo-btn">Add photos</button>
           <input type="file" id="cg-photo-input" accept="image/*" multiple hidden>
-          <span class="hint" id="cg-photo-hint">Photos go in the shift packet, right after this citation.</span>
+          <span class="hint" id="cg-photo-hint">Photos go in the shift report, right after this citation.</span>
           <div class="photo-thumbs" id="cg-photos"></div>
         </div>
       </section>
@@ -227,7 +227,7 @@
 
       <div class="actions">
         <button type="button" id="cg-new-btn" class="secondary">New citation</button>
-        <button type="button" id="cg-packet-btn" class="pdf-action" hidden>Add to packet</button>
+        <button type="button" id="cg-packet-btn" class="pdf-action" hidden>Add to shift report</button>
         <button type="button" id="cg-share-btn" class="pdf-action" hidden>Share / Print / Save</button>
         <a id="cg-download-main" class="button pdf-action" hidden>Download PDF</a>
       </div>
@@ -321,7 +321,7 @@
         <div class="photos" id="ir-photos-box" hidden>
           <button type="button" class="button secondary photo-add" id="ir-photo-btn">Add photos</button>
           <input type="file" id="ir-photo-input" accept="image/*" multiple hidden>
-          <span class="hint" id="ir-photo-hint">Photos go in the shift packet, right after this report.</span>
+          <span class="hint" id="ir-photo-hint">Photos go in the shift report, right after this incident report.</span>
           <div class="photo-thumbs" id="ir-photos"></div>
         </div>
       </section>
@@ -359,7 +359,7 @@
 
       <div class="actions">
         <button type="button" id="ir-new-btn" class="secondary">New report</button>
-        <button type="button" id="ir-packet-btn" class="pdf-action" hidden>Add to packet</button>
+        <button type="button" id="ir-packet-btn" class="pdf-action" hidden>Add to shift report</button>
         <button type="button" id="ir-share-btn" class="pdf-action" hidden>Share / Print / Save</button>
         <a id="ir-download-main" class="button pdf-action" hidden>Download PDF</a>
       </div>
@@ -598,7 +598,7 @@
       </section>
 
       <section class="card packet" aria-labelledby="packet-title">
-        <h2 id="packet-title">Shift packet</h2>
+        <h2 id="packet-title">Submit report</h2>
         <p class="hint" id="packet-summary"></p>
         <ul class="packet-list" id="packet-list"></ul>
         <div class="photos">
@@ -607,7 +607,7 @@
           <div class="photo-thumbs" id="packet-photos"></div>
         </div>
         <div class="pdf-result">
-          <a id="packet-submit" class="button pdf-action" hidden>Submit packet</a>
+          <a id="packet-submit" class="button pdf-action" hidden>Submit report</a>
         </div>
         <p id="packet-files" class="hint center"></p>
         <p id="packet-status" class="hint center" aria-live="polite"></p>

@@ -703,7 +703,7 @@ const Citation = (() => {
     $("#cg-new-btn").addEventListener("click", () => {
       const message = packet.inPacket
         ? "Clear this citation and start a new one?"
-        : "This citation isn't in the shift packet. Clear it and start a new one anyway?";
+        : "This citation isn't in the shift report. Clear it and start a new one anyway?";
       if (confirm(message)) newCitation();
     });
   }

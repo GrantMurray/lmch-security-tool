@@ -156,7 +156,7 @@ const Incident = (() => {
     $("#ir-new-btn").addEventListener("click", () => {
       const message = packet.inPacket
         ? "Clear this incident report and start a new one?"
-        : "This incident report isn't in the shift packet. Clear it and start a new one anyway?";
+        : "This incident report isn't in the shift report. Clear it and start a new one anyway?";
       if (confirm(message)) newReport();
     });
   }

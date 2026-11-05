@@ -67,9 +67,9 @@ the page says "✓ Available offline", it will work with no signal.
 - *Citation:* on phones and tablets, **Share / Print / Save** opens the system
   share sheet (Save to Files, Print, AirDrop, email…); elsewhere it's
   **Download PDF**.
-- *Shift report:* **Submit packet** sends it. On phones and tablets it opens
+- *Shift report:* **Submit report** sends it. On phones and tablets it opens
   the share sheet with each file; on desktops it downloads the report as a
-  PDF, or everything in one .zip if the packet has citations, incident reports
+  PDF, or everything in one .zip if citations, incident reports
   or photos.
 
 **Updating:** deploy the new files. Each device picks up the change the next
@@ -87,7 +87,7 @@ sw.js                       service worker: offline cache
 src/
   app.js                    access code, form picker, theme, offline status
   common.js                 shared helpers: drafts, signature pads, live PDF rebuild
-  packet.js                 shift packet: citations and photos stored until submitted
+  packet.js                 citations, incident reports and photos kept with the shift report until submitted
   citation.js               citation: map picker, fines list, autofill
   shift-report.js           shift report: journal hint, PDF download/share
   incident.js               incident report: description hint, PDF download/share
@@ -164,29 +164,29 @@ management signature and date are left for management to sign on paper.
   keeps its own description of violation. The choice is remembered per device.
   When the list changes, edit `fines.csv` and re-run `tools/lock_assets.py`.
 - **Incident report:** "Reported by" is remembered per browser once a report
-  has been shared, downloaded or added to the packet. Each report gets an id
+  has been shared, downloaded or added to the shift report. Each report gets an id
   when it's started (e.g. IR-261102-2245), used in its file name.
 - **Shift report:** the security journal wraps across the PDF's 18 ruled
   lines; longer entries print in smaller text to fit. Area comments wrap
   across their two lines.
-- **Shift packet:** on the Citation and Incident report tabs, **Add to
-  packet** keeps that document's PDF on the device (in IndexedDB). Editing it
-  afterwards shows **Update in packet** to replace the stored copy. The Shift
-  packet section at the bottom of the shift report lists them (each can be
-  removed) and fills in the citations and incident reports totals. **Submit
-  packet** hands over every document and photo as its own file, so each can
+- **Submitting the shift report:** on the Citation and Incident report tabs,
+  **Add to shift report** keeps that document's PDF on the device (in
+  IndexedDB). Editing it afterwards shows **Update in shift report** to replace
+  the stored copy. The Submit report section at the bottom of the shift
+  report lists them (each can be removed) and fills in the citations and
+  incident reports totals. **Submit report** hands over every document and photo as its own file, so each can
   be saved and filed separately: on phones and tablets it opens the share
   sheet with all of them (Save to Files saves each one), and elsewhere it
-  downloads one uncompressed `.zip` holding them in a `shift-packet-<date>`
+  downloads one uncompressed `.zip` holding them in a `shift-report-<date>`
   folder. Photos are named after what they go with, e.g.
   `citation-001-100000-B4-S23-photo-1.jpg` or `shift-11-02-2026-photo-1.jpg`. Afterwards the app offers to remove
-  what was submitted from the packet. Unlike drafts, packet documents include
+  what was submitted from the shift report. Unlike drafts, added documents include
   their drawn signatures, so they stay on the device until removed.
 - **Photos:** **Add photos** on a citation (next to Pictures attached) or an
-  incident report (under the description) puts them in the packet linked to
+  incident report (under the description) adds them to the shift report linked to
   that document, named after it; on a citation it also ticks Pictures
-  attached: Yes. **Add shift photos** in the Shift packet section adds
+  attached: Yes. **Add shift photos** in the Submit report section adds
   general photos. Photos are shrunk to 1600 px JPEGs before they're stored.
-  Removing a document from the packet removes its photos too.
+  Removing a document from the shift report removes its photos too.
 - The sun/moon button switches light and dark mode. It follows the device
   setting until used, then remembers the choice on that device.

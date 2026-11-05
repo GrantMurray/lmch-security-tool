@@ -325,7 +325,7 @@ body.map-open { overflow: hidden; }
 .stale .pdf-action { opacity: 0.6; }
 .button { display: inline-block; text-decoration: none; }
 
-/* ---- Shift packet ------------------------------------------------- */
+/* ---- Shift report submission ------------------------------------------------- */
 .packet { margin-top: 4px; }
 .packet-list { list-style: none; margin: 0 0 10px; padding: 0; }
 .packet-list li {
@@ -335,7 +335,7 @@ body.map-open { overflow: hidden; }
 .packet-list li:last-child { border-bottom: 1px solid var(--line); }
 .packet-list .link-btn { flex: none; }
 
-/* Photo pickers and previews (citation and shift packet). */
+/* Photo pickers and previews (citation, incident report and shift report). */
 .photos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 4px 0 12px; }
 .photos .hint { margin: 0; }
 .photo-add { font-size: 0.95rem; padding: 9px 16px; }

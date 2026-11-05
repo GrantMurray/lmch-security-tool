@@ -116,7 +116,7 @@ const Packet = (() => {
       remove.textContent = "×";
       remove.ariaLabel = `Remove photo ${i + 1}`;
       remove.addEventListener("click", async () => {
-        if (confirm("Remove this photo from the packet?")) await removeMany([p.id]);
+        if (confirm("Remove this photo from the shift report?")) await removeMany([p.id]);
       });
       fig.append(img, remove);
       container.append(fig);
@@ -149,7 +149,7 @@ const Packet = (() => {
       let items = [];
       try { items = await list(); } catch (err) { console.error(err); }
       const stored = items.some((i) => i.id === id);
-      btn.textContent = stored ? (inPacket ? "✓ In packet" : "Update in packet") : "Add to packet";
+      btn.textContent = stored ? (inPacket ? "✓ In shift report" : "Update in shift report") : "Add to shift report";
       btn.classList.toggle("secondary", stored && inPacket);
       if (photosFor !== id) {
         photosFor = id;
@@ -171,10 +171,10 @@ const Packet = (() => {
         inPacket = true;
         onAdded?.();
         const n = (await list()).filter((i) => !isPhoto(i)).length;
-        status.textContent = `${doc.label} is in the shift packet (${n} in the packet so far). ${next}`;
+        status.textContent = `${doc.label} is in the shift report (${n} added so far). ${next}`;
       } catch (err) {
         console.error(err);
-        status.textContent = `Couldn't add to the packet: ${err.message}`;
+        status.textContent = `Couldn't add to the shift report: ${err.message}`;
       } finally {
         btn.disabled = false;
         await show();
@@ -194,7 +194,7 @@ const Packet = (() => {
         const doc = current();
         const n = await addPhotos(input.files, { doc: doc.id, label: doc.label });
         hint.className = "hint ok";
-        hint.textContent = `${n} photo${n === 1 ? "" : "s"} added to the shift packet with ${doc.label}.`;
+        hint.textContent = `${n} photo${n === 1 ? "" : "s"} added to the shift report with ${doc.label}.`;
         onPhotos?.();
       } catch (err) {
         console.error(err);
