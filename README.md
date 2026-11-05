@@ -67,10 +67,10 @@ the page says "✓ Available offline", it will work with no signal.
 - *Citation:* on phones and tablets, **Share / Print / Save** opens the system
   share sheet (Save to Files, Print, AirDrop, email…); elsewhere it's
   **Download PDF**.
-- *Shift report:* in Safari and on desktops, **Download PDF** downloads the
-  file. In the app opened from the Home Screen, iOS doesn't allow downloads,
-  so the button becomes **Share PDF** and opens the share sheet: tap
-  **Save to Files**.
+- *Shift report:* **Submit packet** sends it. On phones and tablets it opens
+  the share sheet with each file; on desktops it downloads the report as a
+  PDF, or everything in one .zip if the packet has citations, incident reports
+  or photos.
 
 **Updating:** deploy the new files. Each device picks up the change the next
 time it opens the app with a connection (the change shows on the following

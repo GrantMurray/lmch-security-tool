@@ -278,15 +278,11 @@ const Citation = (() => {
       if (pts.size < 2) pinch = null;
       if (pts.size === 0) { drag = null; mapVp.classList.remove("dragging"); }
     };
-    // Reset gesture state if pointer capture is lost (e.g., app switch, phone call).
-    mapVp.addEventListener("lostpointercapture", () => {
-      pts.clear();
-      drag = null;
-      pinch = null;
-      mapVp.classList.remove("dragging");
-    });
     mapVp.addEventListener("pointerup", (e) => end(e, false));
     mapVp.addEventListener("pointercancel", (e) => end(e, true));
+    // Capture lost without a pointerup/cancel: drop just that pointer. After a
+    // normal pointerup, end() has already removed it, so this does nothing.
+    mapVp.addEventListener("lostpointercapture", (e) => end(e, true));
     // Trackpad pinch (and ctrl + scroll wheel) zooms the map, not the page.
     mapVp.addEventListener("wheel", (e) => {
       if (!e.ctrlKey) return;

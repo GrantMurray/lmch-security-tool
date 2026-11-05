@@ -106,9 +106,15 @@ const ShiftReport = (() => {
     const btn = $("#packet-submit");
     if (zipUrl) URL.revokeObjectURL(zipUrl);
     zipUrl = null;
-    if (sharesPacket()) {
+    const shares = sharesPacket();
+    const single = packetFiles.length === 1; // just this report
+    if (shares) {
       btn.href = "#";
       btn.removeAttribute("download");
+    } else if (single) {
+      // Nothing else to bundle: download the report as a plain PDF.
+      btn.href = lastUrl;
+      btn.download = reportFile.name;
     } else {
       const name = `shift-packet-${date}`;
       zipUrl = URL.createObjectURL(await Packet.zip(packetFiles, name));
@@ -116,8 +122,10 @@ const ShiftReport = (() => {
       btn.download = `${name}.zip`;
     }
     btn.hidden = false;
-    $("#packet-files").textContent = `Submit sends ${plural(packetFiles.length, "separate file")}` +
-      (sharesPacket() ? "." : ` (downloaded together in one .zip).`);
+    $("#packet-files").textContent = single
+      ? `Submit sends the shift report${shares ? "" : " as a PDF"}.`
+      : `Submit sends ${plural(packetFiles.length, "separate file")}` +
+        (shares ? "." : " (downloaded together in one .zip).");
   }
 
   function renderPacket() {
