@@ -116,7 +116,7 @@ const ShiftReport = (() => {
       btn.href = lastUrl;
       btn.download = reportFile.name;
     } else {
-      const name = `shift-packet-${date}`;
+      const name = `shift-report-${date}`;
       zipUrl = URL.createObjectURL(await Packet.zip(packetFiles, name));
       btn.href = zipUrl;
       btn.download = `${name}.zip`;
@@ -133,7 +133,7 @@ const ShiftReport = (() => {
     const photos = packetPhotos();
     $("#packet-summary").textContent = packetItems.length
       ? `This report plus ${describe(packetItems)}. Submit at the end of the shift.`
-      : "Nothing added yet: use Add to packet on the Citation or Incident report tab. Submitting now sends just this report.";
+      : "Nothing added yet: use Add to shift report on the Citation or Incident report tab. Submitting now sends just this report.";
     const list = $("#packet-list");
     list.innerHTML = "";
     for (const item of docs) {
@@ -147,7 +147,7 @@ const ShiftReport = (() => {
       remove.textContent = "Remove";
       remove.addEventListener("click", async () => {
         const also = own.length ? ` and its ${plural(own.length, "photo")}` : "";
-        if (confirm(`Remove ${item.label || `Citation ${item.id}`}${also} from the packet?`)) {
+        if (confirm(`Remove ${item.label || `Citation ${item.id}`}${also} from the shift report?`)) {
           await Packet.removeMany([item.id, ...own.map((p) => p.id)]);
         }
       });
@@ -183,7 +183,7 @@ const ShiftReport = (() => {
       packetItems = await Packet.list();
     } catch (err) {
       console.error(err);
-      $("#packet-status").textContent = `Couldn't read the packet: ${err.message}`;
+      $("#packet-status").textContent = `Couldn't read the added documents: ${err.message}`;
       packetItems = [];
     }
     renderPacket();
@@ -200,7 +200,7 @@ const ShiftReport = (() => {
     if (!packetFiles.length) { e.preventDefault(); return; }
     if (form.classList.contains("stale")) {
       e.preventDefault();
-      status.textContent = "The packet is still updating. Try again in a moment.";
+      status.textContent = "The shift report is still updating. Try again in a moment.";
       return;
     }
     const items = packetItems;
@@ -210,7 +210,7 @@ const ShiftReport = (() => {
       try {
         await navigator.share({ files });
       } catch (err) {
-        if (err.name !== "AbortError") status.textContent = `Couldn't share the packet: ${err.message}`;
+        if (err.name !== "AbortError") status.textContent = `Couldn't share the shift report: ${err.message}`;
         return;
       }
     }
@@ -221,7 +221,7 @@ const ShiftReport = (() => {
 
   async function offerClear(items) {
     if (!items.length) return;
-    if (!confirm(`Remove the submitted ${describe(items)} from the packet?`)) return;
+    if (!confirm(`Remove the submitted ${describe(items)} from the shift report?`)) return;
     // Only what was submitted: anything added since stays for next time.
     await Packet.removeMany(items.map((i) => i.id));
   }
@@ -236,7 +236,7 @@ const ShiftReport = (() => {
     status.textContent = "Adding photos…";
     try {
       const n = await Packet.addPhotos(input.files, { label: "Shift photo" });
-      status.textContent = `${plural(n, "photo")} added to the packet.`;
+      status.textContent = `${plural(n, "photo")} added to the shift report.`;
     } catch (err) {
       console.error(err);
       status.textContent = `Couldn't add the photos: ${err.message}`;
@@ -274,7 +274,7 @@ const ShiftReport = (() => {
     updateJournalHint();
     if (Packet.isSupported()) refreshPacket();
     else {
-      $("#packet-summary").textContent = "This browser can't keep a packet.";
+      $("#packet-summary").textContent = "This browser can't keep citations, incident reports or photos with the shift report.";
       schedulePdf();
     }
   }
