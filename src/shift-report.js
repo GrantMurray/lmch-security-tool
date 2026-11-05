@@ -54,13 +54,7 @@ const ShiftReport = (() => {
   let lastUrl = null;
   let lastFile = null;
 
-  // An app opened from the iPad/iPhone Home Screen can't download files: a
-  // download link replaces the app with the PDF. There the button becomes
-  // Share PDF and opens the share sheet, whose "Save to Files" saves it.
-  // Browser tabs and desktops get a normal Download PDF.
-  const sharesPdf = (file) => installedApp() && canShareFile(file);
-
-  const schedulePdf = livePdf(form, $("#sr-pdf-status"), async () => {
+  const schedulePdf = livePdf(form, $("#packet-status"), async () => {
     templateBytes ||= Vault.bytes(TEMPLATE_PATH);
     const values = collectValues(form);
     const bytes = await window.fillShiftReport(PDFLib, templateBytes, values);
@@ -71,27 +65,8 @@ const ShiftReport = (() => {
     lastFile = new File([bytes], name, { type: "application/pdf" });
     if (lastUrl) URL.revokeObjectURL(lastUrl);
     lastUrl = URL.createObjectURL(lastFile);
-
-    const dl = $("#sr-download");
-    dl.href = lastUrl;
-    dl.download = name;
-    dl.textContent = sharesPdf(lastFile) ? "Share PDF" : "Download PDF";
-    dl.hidden = false;
-    $("#sr-open-link").href = lastUrl;
-    $("#sr-pdf-result").hidden = false;
-    $("#sr-pdf-status").textContent = `${name} is up to date.`;
     await buildPacket(lastFile, date);
   });
-
-  async function downloadPdf(e) {
-    if (!lastFile || !sharesPdf(lastFile)) return; // a normal download
-    e.preventDefault();
-    try {
-      await navigator.share({ files: [lastFile] });
-    } catch (err) {
-      if (err.name !== "AbortError") $("#sr-pdf-status").textContent = `Couldn't save the PDF: ${err.message}`;
-    }
-  }
 
   // ---- Shift packet --------------------------------------------------------
   // The packet is this report plus every citation, incident report and photo
@@ -275,7 +250,6 @@ const ShiftReport = (() => {
     form.addEventListener("input", changed);
     form.addEventListener("change", changed);
     form.addEventListener("submit", (e) => e.preventDefault());
-    $("#sr-download").addEventListener("click", downloadPdf);
     $("#packet-submit").addEventListener("click", submitPacket);
     Packet.onChange(refreshPacket);
     $("#sr-photo-btn").addEventListener("click", () => $("#sr-photo-input").click());

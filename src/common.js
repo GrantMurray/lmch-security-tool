@@ -70,11 +70,12 @@ function restoreDraft(form, key) {
   let raw;
   try { raw = JSON.parse(store.get(key) || "null"); } catch { raw = null; }
   if (!raw) return false;
+  // Only restore fields that are still empty/default — don't overwrite user input.
   for (const el of form.elements) {
     if (!el.name || !(el.name in raw)) continue;
-    if (el.type === "checkbox") el.checked = !!raw[el.name];
-    else if (el.type === "radio") el.checked = raw[el.name] === el.value;
-    else el.value = raw[el.name];
+    if (el.type === "checkbox") { if (el.checked !== !!raw[el.name]) el.checked = !!raw[el.name]; }
+    else if (el.type === "radio") { if (!el.checked && raw[el.name] === el.value) el.checked = true; }
+    else if (!el.value) el.value = raw[el.name];
   }
   return true;
 }
@@ -262,6 +263,14 @@ function livePdf(form, status, build) {
       }
     }
   }
+
+  // Clean up timer when page is hidden or unloaded to prevent background PDF builds.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) clearTimeout(timer);
+  });
+  window.addEventListener("beforeunload", () => {
+    clearTimeout(timer);
+  });
 
   schedule.idle = () => (dirty || building ? new Promise((resolve) => waiters.push(resolve)) : Promise.resolve(ok));
   return schedule;
